@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#020817">
+<title>CONNECTION TZ | ADMIN PANEL</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --bg:#020817;
+  --panel:#07152a;
+  --cyan:#00eaff;
+  --blue:#087bff;
+  --text:#eafaff;
+  --muted:#8ba8bd;
+  --red:#ff405c;
+  --green:#00e69a;
+  --border:rgba(0,234,255,.2);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  min-height:100vh;
+  background:
+  radial-gradient(circle at 20% 0%,rgba(0,130,255,.16),transparent 35%),
+  radial-gradient(circle at 100% 100%,rgba(0,234,255,.08),transparent 35%),
+  var(--bg);
+  color:var(--text);
+  font-family:'Rajdhani',sans-serif;
+}
+button,input{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.container{width:min(1100px,94%);margin:auto}
+
+header{
+  padding:20px 0;
+  border-bottom:1px solid var(--border);
+  background:rgba(2,8,23,.85);
+}
+.header-inner{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+}
+.brand{
+  font-family:Orbitron,sans-serif;
+  color:var(--cyan);
+  font-size:19px;
+  font-weight:800;
+  letter-spacing:2px;
+}
+.tag{
+  color:var(--muted);
+  font-size:12px;
+  letter-spacing:2px;
+}
+main{padding:30px 0 60px}
+
+.panel{
+  background:linear-gradient(145deg,rgba(11,29,53,.97),rgba(4,14,30,.97));
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:25px;
+  box-shadow:0 0 35px rgba(0,190,255,.08);
+}
+.login-wrap{
+  width:min(420px,100%);
+  margin:55px auto;
+}
+h1,h2,h3{font-family:Orbitron,sans-serif}
+.login-title{
+  font-size:22px;
+  color:var(--cyan);
+  margin-bottom:8px;
+}
+.sub{color:var(--muted);margin-bottom:24px}
+.field{margin-bottom:17px}
+label{
+  display:block;
+  margin-bottom:7px;
+  color:#b6d8e9;
+  font-size:14px;
+}
+input{
+  width:100%;
+  padding:13px 14px;
+  color:white;
+  background:#020b19;
+  border:1px solid var(--border);
+  border-radius:10px;
+  outline:none;
+}
+input:focus{
+  border-color:var(--cyan);
+  box-shadow:0 0 12px rgba(0,234,255,.12);
+}
+.btn{
+  border:0;
+  border-radius:10px;
+  padding:12px 17px;
+  font-weight:700;
+  transition:.2s;
+}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{
+  color:#00111c;
+  background:linear-gradient(90deg,var(--cyan),#38aaff);
+}
+.btn-outline{
+  color:var(--cyan);
+  border:1px solid var(--border);
+  background:#07172a;
+}
+.btn-danger{color:white;background:#a91d39}
+.full{width:100%}
+.message{
+  padding:11px;
+  border-radius:9px;
+  margin-top:14px;
+  font-size:14px;
+  display:none;
+  overflow-wrap:anywhere;
+}
+.message.error{display:block;background:#451421;color:#ffb5c2}
+.message.success{display:block;background:#06382c;color:#8affd3}
+
+.dashboard-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  flex-wrap:wrap;
+  margin-bottom:25px;
+}
+.dashboard-title{font-size:22px;color:var(--cyan)}
+.dashboard-sub{color:var(--muted);margin-top:6px}
+.actions{display:flex;gap:9px;flex-wrap:wrap}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:15px;
+  margin-bottom:25px;
+}
+.stat{
+  background:linear-gradient(140deg,#0b2340,#061328);
+  border:1px solid var(--border);
+  padding:20px;
+  border-radius:15px;
+}
+.stat-label{color:var(--muted);font-size:14px}
+.stat-number{
+  color:var(--cyan);
+  font-family:Orbitron,sans-serif;
+  font-size:30px;
+  margin-top:9px;
+}
+.section{
+  background:rgba(7,21,42,.9);
+  border:1px solid var(--border);
+  border-radius:15px;
+  overflow:hidden;
+}
+.section-head{
+  padding:18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  border-bottom:1px solid var(--border);
+}
+.section-head h2{font-size:16px;color:var(--cyan)}
+.search{max-width:310px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:650px}
+th,td{
+  padding:14px 16px;
+  text-align:left;
+  border-bottom:1px solid rgba(0,234,255,.09);
+  font-size:14px;
+}
+th{color:var(--cyan);background:rgba(0,234,255,.035)}
+td{color:#d7edf7}
+tr:hover td{background:rgba(0,234,255,.035)}
+.empty{text-align:center;color:var(--muted);padding:35px}
+.status{
+  display:inline-block;
+  padding:5px 10px;
+  border-radius:20px;
+  color:#78ffd0;
+  background:rgba(0,230,154,.1);
+  font-size:12px;
+}
+.footer{
+  text-align:center;
+  color:#607d91;
+  font-size:12px;
+  padding:30px 10px;
+}
+@media(max-width:600px){
+  .brand{font-size:14px}
+  .tag{font-size:10px}
+  .panel{padding:20px}
+  .dashboard-title{font-size:17px}
+  .stat-number{font-size:25px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="container header-inner">
+    <div>
+      <div class="brand">CONNECTION TZ</div>
+      <div class="tag">YASSER TECH SOLUTIONS</div>
+    </div>
+    <div class="tag">ADMIN SYSTEM V1.0</div>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- ADMIN LOGIN -->
+  <section id="loginSection" class="login-wrap">
+    <div class="panel">
+
+      <h1 class="login-title">ADMIN LOGIN</h1>
+      <p class="sub">Welcome to your control panel.</p>
+
+      <form id="loginForm">
+
+        <div class="field">
+          <label for="email">ADMIN EMAIL</label>
+          <input
+            id="email"
+            type="email"
+            placeholder="Enter admin email"
+            required
+            autocomplete="username">
+        </div>
+
+        <div class="field">
+          <label for="password">PASSWORD</label>
+          <input
+            id="password"
+            type="password"
+            placeholder="Enter password"
+            required
+            autocomplete="current-password">
+        </div>
+
+        <button id="loginBtn" class="btn btn-primary full" type="submit">
+          LOGIN TO DASHBOARD
+        </button>
+
+      </form>
+
+      <div id="loginMessage" class="message"></div>
+
+    </div>
+  </section>
+
+
+  <!-- ADMIN DASHBOARD -->
+  <section id="dashboardSection" class="hidden">
+
+    <div class="dashboard-head">
+      <div>
+        <h1 class="dashboard-title">ADMIN DASHBOARD</h1>
+        <p class="dashboard-sub">Manage CONNECTION TZ registered users.</p>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-outline" id="refreshBtn">↻ Refresh</button>
+        <button class="btn btn-danger" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+
+
+    <!-- STATISTICS -->
+    <div class="stats">
+
+      <div class="stat">
+        <div class="stat-label">TOTAL REGISTERED USERS</div>
+        <div class="stat-number" id="totalUsers">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">ADMIN STATUS</div>
+        <div class="stat-number" style="font-size:19px;color:var(--green)">
+          VERIFIED
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- USERS TABLE -->
+    <section class="section">
+
+      <div class="section-head">
+        <h2>REGISTERED USERS</h2>
+
+        <input
+          class="search"
+          id="searchInput"
+          type="search"
+          placeholder="Search username or phone...">
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>USERNAME</th>
+              <th>PHONE</th>
+              <th>REGISTERED</th>
+              <th>STATUS</th>
+            </tr>
+          </thead>
+
+          <tbody id="usersTable">
+            <tr>
+              <td colspan="5" class="empty">Loading users...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+    <div id="dashboardMessage" class="message"></div>
+
+  </section>
+
+</main>
+
+<footer class="footer">
+  CONNECTION TZ © 2026 | POWERED BY YASSER TECH SOLUTIONS
+</footer>
+
+
+<script>
+
+/* =====================================
+   SUPABASE CONFIGURATION
+===================================== */
+
+const SUPABASE_URL =
+"https://dmzsoqsmbohjetbxkpbr.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_sODAIq7AqDBj3-8SADmYvw_rOIyuYPK";
+
+
+/* CREATE SUPABASE CLIENT */
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+
+/* =====================================
+   ELEMENTS
+===================================== */
+
+const loginSection =
+document.getElementById("loginSection");
+
+const dashboardSection =
+document.getElementById("dashboardSection");
+
+const loginForm =
+document.getElementById("loginForm");
+
+const loginBtn =
+document.getElementById("loginBtn");
+
+const loginMessage =
+document.getElementById("loginMessage");
+
+const dashboardMessage =
+document.getElementById("dashboardMessage");
+
+const usersTable =
+document.getElementById("usersTable");
+
+const totalUsers =
+document.getElementById("totalUsers");
+
+const searchInput =
+document.getElementById("searchInput");
+
+let allUsers = [];
+
+
+/* =====================================
+   MESSAGE FUNCTIONS
+===================================== */
+
+function showMessage(element,message,type="error"){
+  element.textContent = message;
+  element.className = "message " + type;
+}
+
+function clearMessage(element){
+  element.textContent = "";
+  element.className = "message";
+}
+
+
+/* =====================================
+   SHOW SECTIONS
+===================================== */
+
+function showLogin(){
+  loginSection.classList.remove("hidden");
+  dashboardSection.classList.add("hidden");
+}
+
+function showDashboard(){
+  loginSection.classList.add("hidden");
+  dashboardSection.classList.remove("hidden");
+}
+
+
+/* =====================================
+   VERIFY ADMIN UID
+===================================== */
+
+async function verifyAdmin(){
+
+  const {data,error} =
+  await supabaseClient.auth.getUser();
+
+  if(error || !data.user){
+    return false;
+  }
+
+  const userId = data.user.id;
+
+  const {data:admin,error:adminError} =
+  await supabaseClient
+  .from("admins")
+  .select("user_id")
+  .eq("user_id",userId)
+  .maybeSingle();
+
+  if(adminError){
+    throw new Error(
+      "Admin verification failed: " + adminError.message
+    );
+  }
+
+  if(!admin){
+    throw new Error(
+      "Account hii haina ADMIN permission. Hakikisha UID imeongezwa kwenye admins."
+    );
+  }
+
+  return true;
+}
+
+
+/* =====================================
+   LOGIN
+===================================== */
+
+loginForm.addEventListener("submit",async function(event){
+
+  event.preventDefault();
+
+  clearMessage(loginMessage);
+
+  const email =
+  document.getElementById("email").value.trim();
+
+  const password =
+  document.getElementById("password").value;
+
+  loginBtn.disabled = true;
+  loginBtn.textContent = "VERIFYING...";
+
+  try{
+
+    const {error} =
+    await supabaseClient.auth.signInWithPassword({
+      email:email,
+      password:password
+    });
+
+    if(error) throw error;
+
+    const isAdmin = await verifyAdmin();
+
+    if(!isAdmin){
+      throw new Error("Admin verification failed.");
+    }
+
+    showDashboard();
+
+    await loadUsers();
+
+  }catch(error){
+
+    await supabaseClient.auth.signOut();
+
+    showLogin();
+
+    showMessage(
+      loginMessage,
+      error.message || "Login failed."
+    );
+
+  }finally{
+
+    loginBtn.disabled = false;
+    loginBtn.textContent = "LOGIN TO DASHBOARD";
+
+  }
+
+});
+
+
+/* =====================================
+   LOAD REGISTERED USERS
+===================================== */
+
+async function loadUsers(){
+
+  usersTable.innerHTML =
+  '<tr><td colspan="5" class="empty">Loading users...</td></tr>';
+
+  clearMessage(dashboardMessage);
+
+  try{
+
+    const isAdmin = await verifyAdmin();
+
+    if(!isAdmin){
+      throw new Error("Admin verification failed.");
+    }
+
+    const {data,error} =
+    await supabaseClient
+    .from("users")
+    .select("id,username,phone,created_at,last_seen")
+    .order("created_at",{ascending:false});
+
+    if(error) throw error;
+
+    allUsers = data || [];
+
+    totalUsers.textContent =
+    allUsers.length.toLocaleString();
+
+    renderUsers(allUsers);
+
+  }catch(error){
+
+    usersTable.innerHTML =
+    '<tr><td colspan="5" class="empty">Unable to load users.</td></tr>';
+
+    showMessage(
+      dashboardMessage,
+      error.message || "Could not load users."
+    );
+
+  }
+
+}
+
+
+/* =====================================
+   SAFE HTML
+===================================== */
+
+function escapeHTML(value){
+
+  return String(value ?? "").replace(/[&<>"']/g,function(char){
+
+    return {
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    }[char];
+
+  });
+
+}
+
+
+/* =====================================
+   DISPLAY USERS
+===================================== */
+
+function renderUsers(users){
+
+  if(!users.length){
+
+    usersTable.innerHTML =
+    '<tr><td colspan="5" class="empty">No registered users found.</td></tr>';
+
+    return;
+
+  }
+
+  usersTable.innerHTML = users.map(function(user,index){
+
+    const date = user.created_at
+    ? new Date(user.created_at).toLocaleString()
+    : "N/A";
+
+    return `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${escapeHTML(user.username)}</td>
+        <td>${escapeHTML(user.phone)}</td>
+        <td>${escapeHTML(date)}</td>
+        <td><span class="status">REGISTERED</span></td>
+      </tr>
+    `;
+
+  }).join("");
+
+}
+
+
+/* =====================================
+   SEARCH USERS
+===================================== */
+
+searchInput.addEventListener("input",function(){
+
+  const query = this.value.trim().toLowerCase();
+
+  const filtered = allUsers.filter(function(user){
+
+    return (
+      String(user.username || "")
+      .toLowerCase()
+      .includes(query)
+      ||
+      String(user.phone || "")
+      .toLowerCase()
+      .includes(query)
+    );
+
+  });
+
+  renderUsers(filtered);
+
+});
+
+
+/* =====================================
+   REFRESH
+===================================== */
+
+document.getElementById("refreshBtn")
+.addEventListener("click",async function(){
+
+  await loadUsers();
+
+});
+
+
+/* =====================================
+   LOGOUT
+===================================== */
+
+document.getElementById("logoutBtn")
+.addEventListener("click",async function(){
+
+  await supabaseClient.auth.signOut();
+
+  allUsers = [];
+
+  totalUsers.textContent = "0";
+
+  showLogin();
+
+});
+
+
+/* =====================================
+   CHECK EXISTING SESSION
+===================================== */
+
+async function checkSession(){
+
+  try{
+
+    const {data,error} =
+    await supabaseClient.auth.getSession();
+
+    if(error) throw error;
+
+    if(!data.session){
+      showLogin();
+      return;
+    }
+
+    const isAdmin = await verifyAdmin();
+
+    if(isAdmin){
+
+      showDashboard();
+
+      await loadUsers();
+
+    }else{
+
+      await supabaseClient.auth.signOut();
+
+      showLogin();
+
+    }
+
+  }catch(error){
+
+    await supabaseClient.auth.signOut();
+
+    showLogin();
+
+    showMessage(
+      loginMessage,
+      error.message || "Session verification failed."
+    );
+
+  }
+
+}
+
+
+/* START APPLICATION */
+
+checkSession();
+
+</script>
+
+</body>
+</html>
